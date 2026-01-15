@@ -1,0 +1,180 @@
+# Spark Dating App - Cursor Rules
+
+## Project Overview
+Modern TikTok-inspired dating app built with Next.js 14, Supabase, and Framer Motion.
+
+## Tech Stack
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript
+- **Styling**: Tailwind CSS, Framer Motion
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Realtime)
+- **State**: Zustand
+- **Deployment**: Vercel (web), Android (React Native/Capacitor)
+
+## Code Style
+
+### TypeScript
+- Use strict mode
+- Prefer interfaces over types for objects
+- Use proper types, avoid `any` unless necessary
+- Use optional chaining and nullish coalescing
+
+### React Components
+- Functional components with hooks
+- Use `'use client'` for client components
+- Keep components small and focused
+- Extract reusable logic into custom hooks
+
+### File Structure
+```
+app/                 # Next.js app router pages
+components/          # Reusable UI components
+lib/                 # Utilities, Supabase client, state
+public/              # Static assets
+supabase/            # Database schema and migrations
+```
+
+### Naming Conventions
+- Components: PascalCase (e.g., `ProfileCard.tsx`)
+- Files: camelCase or kebab-case
+- Hooks: prefix with `use` (e.g., `useProfile`)
+- Constants: UPPER_SNAKE_CASE
+
+### Styling
+- Use Tailwind utility classes
+- Leverage custom classes from `globals.css`:
+  - `.glass` for glassmorphism
+  - `.gradient-red`, `.gradient-blue`, `.gradient-turquoise`
+  - `.btn-primary`, `.btn-icon`
+- Use Framer Motion for animations
+- Keep responsive mobile-first
+
+### Supabase Patterns
+- Always check authentication before queries
+- Use Row Level Security (RLS)
+- Handle errors gracefully
+- Use real-time subscriptions for chat
+- Clean up subscriptions in useEffect cleanup
+
+### Security
+- Never expose service role key in client
+- Always validate user input
+- Use RLS policies for all tables
+- Sanitize user-generated content
+- Rate limit API calls
+
+### Performance
+- Use Next.js Image component
+- Lazy load heavy components
+- Optimize images before upload
+- Use pagination for large lists
+- Memoize expensive calculations
+
+### Error Handling
+- Use try-catch blocks
+- Show user-friendly error messages
+- Log errors for debugging
+- Handle offline scenarios
+
+## Common Patterns
+
+### Fetching Data
+```typescript
+const loadData = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/auth')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('table')
+      .select('*')
+      .eq('user_id', user.id)
+
+    if (error) throw error
+    setData(data)
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    setLoading(false)
+  }
+}
+```
+
+### Real-time Subscriptions
+```typescript
+useEffect(() => {
+  const channel = supabase
+    .channel('my-channel')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: 'messages' 
+    }, handleNewMessage)
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [])
+```
+
+### Animations
+```typescript
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -20 }}
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+/>
+```
+
+## Database Guidelines
+- Use UUIDs for primary keys
+- Always add indexes for foreign keys
+- Use triggers for automatic actions
+- Add timestamps (created_at, updated_at)
+- Use JSONB for flexible data
+
+## Testing
+- Test authentication flows
+- Test RLS policies
+- Test real-time features
+- Test on mobile devices
+- Test offline scenarios
+
+## Deployment Checklist
+- [ ] Environment variables set
+- [ ] Database schema applied
+- [ ] Storage bucket created
+- [ ] RLS policies enabled
+- [ ] Realtime enabled
+- [ ] Images optimized
+- [ ] Error tracking set up
+- [ ] Analytics configured
+
+## Color Palette
+- Primary Red: `#FF2D55`
+- Primary Blue: `#2F6BFF`
+- Turquoise: `#19D3C5`
+- Dark BG: `#070A0F`
+- Card BG: `#0F1419`
+- Border: `#1C2128`
+
+## Key Features
+- TikTok-style vertical swipe feed
+- Real-time chat
+- Smart matching algorithm
+- Photo/video profiles
+- Safety features (block, report)
+- Location-based discovery
+
+## Resources
+- [Supabase Docs](https://supabase.com/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [Framer Motion](https://www.framer.com/motion/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+
+
