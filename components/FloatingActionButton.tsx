@@ -1,27 +1,130 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Heart, MessageCircle, Star, Video, Camera, MapPin, Gift } from 'lucide-react'
+import { Plus, Heart, MessageCircle, Star, Video, Camera, MapPin, Gift, Zap } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 
 interface FloatingActionButtonProps {
   className?: string
+  onSuperLike?: () => void
+  onBoost?: () => void
 }
 
-export default function FloatingActionButton({ className }: FloatingActionButtonProps) {
+export default function FloatingActionButton({ className, onSuperLike, onBoost }: FloatingActionButtonProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const { showMatchModal, setShowMatchModal } = useStore()
+  const [superLikesLeft, setSuperLikesLeft] = useState(5)
+  const [boostsLeft, setBoostsLeft] = useState(3)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadUsageLimits()
+  }, [])
+
+  const loadUsageLimits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      setUserId(user.id)
+
+      // Get today's date at midnight
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Count super likes today
+      const { data: superLikes } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('from_user', user.id)
+        .eq('kind', 'superlike')
+        .gte('created_at', today.toISOString())
+
+      setSuperLikesLeft(Math.max(0, 5 - (superLikes?.length || 0)))
+
+      // Count boosts today
+      const { data: boosts } = await supabase
+        .from('boosts')
+        .select('id')
+        .eq('user_id', user.id)
+        .gte('created_at', today.toISOString())
+
+      setBoostsLeft(Math.max(0, 3 - (boosts?.length || 0)))
+    } catch (error) {
+      console.error('[FloatingActionButton] Error loading limits:', error)
+    }
+  }
+
+  const handleSuperLike = async () => {
+    if (superLikesLeft <= 0) {
+      alert('You\'ve used all 5 Super Likes for today! Come back tomorrow.')
+      return
+    }
+    
+    if (onSuperLike) {
+      onSuperLike()
+      setSuperLikesLeft(prev => Math.max(0, prev - 1))
+    }
+    setIsOpen(false)
+  }
+
+  const handleBoost = async () => {
+    if (boostsLeft <= 0) {
+      alert('You\'ve used all 3 Boosts for today! Come back tomorrow.')
+      return
+    }
+
+    if (!userId) return
+
+    try {
+      const endsAt = new Date()
+      endsAt.setHours(endsAt.getHours() + 1)
+
+      await supabase
+        .from('boosts')
+        .insert({
+          user_id: userId,
+          ends_at: endsAt.toISOString()
+        })
+
+      setBoostsLeft(prev => Math.max(0, prev - 1))
+      
+      if (onBoost) {
+        onBoost()
+      }
+      
+      alert('🚀 Your profile is now boosted for 1 hour!')
+    } catch (error) {
+      console.error('[FloatingActionButton] Error boosting:', error)
+      alert('Failed to boost profile. Please try again.')
+    }
+    
+    setIsOpen(false)
+  }
 
   // Context-aware actions based on current page
   const getActions = () => {
     if (pathname?.startsWith('/feed')) {
       return [
-        { icon: Star, label: 'Super Like', color: 'gradient-turquoise', action: () => {/* Handle super like */} },
-        { icon: Heart, label: 'Boost Profile', color: 'gradient-red', action: () => {/* Handle boost */} },
+        { 
+          icon: Star, 
+          label: `Super Like (${superLikesLeft}/5)`, 
+          color: 'gradient-turquoise', 
+          action: handleSuperLike,
+          disabled: superLikesLeft <= 0
+        },
+        { 
+          icon: Zap, 
+          label: `Boost (${boostsLeft}/3)`, 
+          color: 'gradient-red', 
+          action: handleBoost,
+          disabled: boostsLeft <= 0
+        },
       ]
     }
     if (pathname?.startsWith('/matches')) {
@@ -71,12 +174,16 @@ export default function FloatingActionButton({ className }: FloatingActionButton
                   exit={{ scale: 0, opacity: 0, x: 20 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => {
-                    action.action()
-                    setIsOpen(false)
+                    if (!(action as any).disabled) {
+                      action.action()
+                    }
                   }}
-                  className={`${action.color} text-white p-3 rounded-full shadow-lg flex items-center gap-2 min-w-[140px] justify-start`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  disabled={(action as any).disabled}
+                  className={`${action.color} text-white p-3 rounded-full shadow-lg flex items-center gap-2 min-w-[160px] justify-start ${
+                    (action as any).disabled ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  whileHover={(action as any).disabled ? {} : { scale: 1.05 }}
+                  whileTap={(action as any).disabled ? {} : { scale: 0.95 }}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-sm font-medium">{action.label}</span>

@@ -41,6 +41,8 @@
     height: -webkit-fill-available;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
+    /* Enable smooth scrolling */
+    scroll-behavior: smooth;
   }
   
   body {
@@ -50,6 +52,25 @@
     position: fixed;
     width: 100%;
     overscroll-behavior: none;
+    /* Hardware acceleration for better performance */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Optimize all animations for performance */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Smooth transitions for interactive elements */
+  button, a, [role="button"] {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
   }
   
   /* Custom scrollbar */

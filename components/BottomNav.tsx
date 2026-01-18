@@ -321,7 +321,7 @@ export default function BottomNav() {
                 >
                   <Icon
                     className={`w-5 h-5 transition-all ${
-                      isActive ? 'text-primary-red drop-shadow-lg' : 'text-gray-400'
+                      isActive ? 'text-white drop-shadow-lg' : 'text-gray-400'
                     }`}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
@@ -337,7 +337,7 @@ export default function BottomNav() {
                 
                 <motion.span
                   className={`text-[10px] font-medium transition-colors whitespace-nowrap ${
-                    isActive ? 'text-primary-red' : 'text-gray-400'
+                    isActive ? 'text-white' : 'text-gray-400'
                   }`}
                   animate={isActive ? { scale: 1.05 } : { scale: 1 }}
                 >

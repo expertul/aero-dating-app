@@ -58,7 +58,7 @@ export default function ActivityFeed() {
 
       const allActivities: Activity[] = []
 
-      // Get likes
+      // Get likes with media
       const { data: likes } = await supabase
         .from('likes')
         .select(`
@@ -67,7 +67,11 @@ export default function ActivityFeed() {
           created_at,
           from_user,
           to_user,
-          from_user_profile:profiles!likes_from_user_fkey(id, name)
+          from_user_profile:profiles!likes_from_user_fkey(
+            id, 
+            name,
+            media:profile_media(storage_path)
+          )
         `)
         .eq('to_user', user.id)
         .neq('from_user', user.id)
@@ -89,7 +93,7 @@ export default function ActivityFeed() {
         })
       })
 
-      // Get matches
+      // Get matches with media
       const { data: matches } = await supabase
         .from('matches')
         .select(`
@@ -97,8 +101,16 @@ export default function ActivityFeed() {
           created_at,
           user_a,
           user_b,
-          profile_a:profiles!matches_user_a_fkey(id, name),
-          profile_b:profiles!matches_user_b_fkey(id, name)
+          profile_a:profiles!matches_user_a_fkey(
+            id, 
+            name,
+            media:profile_media(storage_path)
+          ),
+          profile_b:profiles!matches_user_b_fkey(
+            id, 
+            name,
+            media:profile_media(storage_path)
+          )
         `)
         .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
         .order('created_at', { ascending: false })
@@ -119,7 +131,7 @@ export default function ActivityFeed() {
         })
       })
 
-      // Get recent messages
+      // Get recent messages with media
       const { data: messages } = await supabase
         .from('messages')
         .select(`
@@ -128,9 +140,21 @@ export default function ActivityFeed() {
           created_at,
           match_id,
           sender_id,
+          user_a,
+          user_b,
           matches!inner(
-            profile_a:profiles!matches_user_a_fkey(id, name),
-            profile_b:profiles!matches_user_b_fkey(id, name)
+            user_a,
+            user_b,
+            profile_a:profiles!matches_user_a_fkey(
+              id, 
+              name,
+              media:profile_media(storage_path)
+            ),
+            profile_b:profiles!matches_user_b_fkey(
+              id, 
+              name,
+              media:profile_media(storage_path)
+            )
           )
         `)
         .neq('sender_id', user.id)

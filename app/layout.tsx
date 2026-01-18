@@ -5,6 +5,7 @@ import ActivityTracker from '@/components/ActivityTracker'
 import BotQueueProcessor from '@/components/BotQueueProcessor'
 import FloatingActionButton from '@/components/FloatingActionButton'
 import AppearanceSettingsLoader from '@/components/AppearanceSettingsLoader'
+import AndroidBackHandler from '@/components/AndroidBackHandler'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-dark-bg text-white antialiased`}>
+        <AndroidBackHandler />
         <AppearanceSettingsLoader />
         <ActivityTracker />
         <BotQueueProcessor />

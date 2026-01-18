@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase, getMediaUrl } from '@/lib/supabase'
 import { useStore } from '@/lib/store'
 import dynamic from 'next/dynamic'
-import { Sparkles, RefreshCw, Zap, RotateCcw, Star } from 'lucide-react'
+import { Sparkles, RefreshCw, Zap, RotateCcw, Star, Compass } from 'lucide-react'
 
 // Lazy load heavy components
 const ProfileCard = dynamic(() => import('@/components/ProfileCard'), {
@@ -22,6 +22,9 @@ const BottomNav = dynamic(() => import('@/components/BottomNav'), {
 const DiscoveryModes = dynamic(() => import('@/components/DiscoveryModes'), {
   ssr: false,
 })
+const FloatingActionButton = dynamic(() => import('@/components/FloatingActionButton'), {
+  ssr: false,
+})
 
 export default function FeedPage() {
   const router = useRouter()
@@ -34,6 +37,7 @@ export default function FeedPage() {
   const [topPicks, setTopPicks] = useState<any[]>([])
   const [showTopPicks, setShowTopPicks] = useState(false)
   const [discoveryMode, setDiscoveryMode] = useState<'classic' | 'explore' | 'speed' | 'events' | 'groups' | 'incognito'>('classic')
+  const [showDiscoveryModes, setShowDiscoveryModes] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -177,13 +181,28 @@ export default function FeedPage() {
         // Fall through to regular feed loading
       }
 
-      // Get profiles user has already swiped on
+      // Get profiles user has already swiped on (liked, passed, or superliked)
       const { data: swipedIds } = await supabase
         .from('likes')
         .select('to_user')
         .eq('from_user', currentUserId)
 
       const excludeIds = [currentUserId, ...(swipedIds?.map(s => s.to_user) || [])]
+
+      // Get all matches to exclude matched users
+      const { data: matches } = await supabase
+        .from('matches')
+        .select('user_a, user_b')
+        .or(`user_a.eq.${currentUserId},user_b.eq.${currentUserId}`)
+
+      if (matches) {
+        matches.forEach(match => {
+          const otherUserId = match.user_a === currentUserId ? match.user_b : match.user_a
+          if (!excludeIds.includes(otherUserId)) {
+            excludeIds.push(otherUserId)
+          }
+        })
+      }
 
       // Get blocked users
       const { data: blocked } = await supabase
@@ -605,7 +624,7 @@ export default function FeedPage() {
             <Sparkles className="w-5 h-5 text-white" />
           </motion.div>
           <div>
-            <h1 className="text-lg font-bold gradient-text">Spark</h1>
+            <h1 className="text-lg font-bold gradient-text">AERO</h1>
             <p className="text-[10px] text-gray-400">Find your match</p>
           </div>
         </div>
@@ -623,14 +642,13 @@ export default function FeedPage() {
             </motion.button>
           )}
           <motion.button
-            onClick={handleBoost}
-            className={`p-2 rounded-full transition-all glass ${isBoosted ? 'gradient-turquoise' : 'hover:bg-white/10'}`}
-            disabled={isBoosted}
+            onClick={() => setShowDiscoveryModes(!showDiscoveryModes)}
+            className="p-2 hover:bg-white/10 rounded-full transition-all glass"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            title="Boost your profile for 1 hour"
+            title="Discovery modes"
           >
-            <Zap className={`w-4 h-4 ${isBoosted ? 'text-white' : 'text-primary-turquoise'}`} />
+            <Compass className="w-4 h-4 text-white" />
           </motion.button>
           <motion.button
             onClick={handleRefresh}
@@ -697,6 +715,28 @@ export default function FeedPage() {
         </div>
       )}
 
+      {/* Discovery Modes Dropdown */}
+      <AnimatePresence>
+        {showDiscoveryModes && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              onClick={() => setShowDiscoveryModes(false)}
+            />
+            <DiscoveryModes
+              currentMode={discoveryMode}
+              onModeChange={(mode) => {
+                setDiscoveryMode(mode)
+                setShowDiscoveryModes(false)
+              }}
+            />
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Feed */}
       <div className="flex-1 relative px-2 pb-20">
         {feedProfiles.length === 0 ? (
@@ -743,18 +783,40 @@ export default function FeedPage() {
             </div>
           </motion.div>
         ) : (
-          <div className="relative w-full mx-auto" style={{ height: 'calc(100vh - 140px)' }}>
+          <div className="relative w-full mx-auto" style={{ 
+            height: 'calc(100vh - 140px)',
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}>
             <AnimatePresence mode="wait">
               {feedProfiles.length > 0 && (
                 <motion.div
                   key={feedProfiles[0].id}
                   className="absolute inset-0"
                   initial={{ scale: 0.95, opacity: 0, y: 50 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  animate={{ 
+                    scale: 1, 
+                    opacity: 1, 
+                    y: 0,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 30,
+                      mass: 0.8
+                    }
+                  }}
                   exit={{
                     x: 500,
                     opacity: 0,
-                    transition: { duration: 0.3 }
+                    scale: 0.8,
+                    transition: { 
+                      duration: 0.25,
+                      ease: [0.4, 0, 0.2, 1]
+                    }
+                  }}
+                  style={{
+                    transform: 'translateZ(0)',
+                    willChange: 'transform, opacity'
                   }}
                 >
                   <ProfileCard
@@ -783,6 +845,12 @@ export default function FeedPage() {
 
       {/* Bottom Navigation */}
       <BottomNav />
+      
+      {/* Floating Action Button for Super Like and Boost */}
+      <FloatingActionButton 
+        onSuperLike={() => handleLike('superlike')}
+        onBoost={handleBoost}
+      />
     </div>
   )
 }

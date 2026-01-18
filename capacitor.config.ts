@@ -10,11 +10,11 @@ const config: CapacitorConfig = {
   //   // url: 'http://10.0.2.2:3000', // Android Emulator
   //   cleartext: true
   // }
-  // For production: uncomment and use your Vercel URL
-  // server: {
-  //   url: 'https://your-app.vercel.app',
-  //   cleartext: false
-  // }
+  // For production: using Vercel URL
+  server: {
+    url: 'https://aero-dating-app.vercel.app',
+    cleartext: false
+  }
 };
 
 export default config;

@@ -445,64 +445,7 @@ export default function ProfileCard({
         </motion.div>
       </div>
 
-      {/* Action buttons (only on top card) */}
-      {isTop && (
-        <div className="absolute bottom-16 left-0 right-0 flex justify-center items-center gap-3 px-4 z-40">
-          <motion.button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onPass()
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onPass()
-            }}
-            className="w-14 h-14 rounded-full bg-white/10 border-2 border-red-500 text-red-500 backdrop-blur-xl flex items-center justify-center shadow-xl touch-manipulation z-40"
-            whileHover={{ scale: 1.1, rotate: -5 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <X className="w-7 h-7" strokeWidth={2.5} />
-          </motion.button>
-
-          <motion.button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onSuperLike()
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onSuperLike()
-            }}
-            className="w-14 h-14 rounded-full gradient-turquoise text-white flex items-center justify-center shadow-xl touch-manipulation z-40"
-            whileHover={{ scale: 1.1, y: -3 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Star className="w-7 h-7 fill-white" />
-          </motion.button>
-
-          <motion.button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onLike()
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onLike()
-            }}
-            className="w-14 h-14 rounded-full gradient-red text-white flex items-center justify-center shadow-xl touch-manipulation z-40"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Heart className="w-7 h-7 fill-white" strokeWidth={0} />
-          </motion.button>
-        </div>
-      )}
+      {/* Action buttons removed - use swipe gestures instead */}
 
     </motion.div>
   )
