@@ -124,8 +124,8 @@ export default function ProfileCard({
       className="profile-card touch-manipulation"
       style={{ x, rotate, opacity, zIndex: isTop ? 10 : 1 }}
       drag={isTop ? 'x' : false}
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
+      dragConstraints={{ left: -300, right: 300 }}
+      dragElastic={0.5}
       onDragEnd={handleDragEnd}
       onDoubleClick={handleDoubleTap}
       whileTap={{ cursor: 'grabbing' }}

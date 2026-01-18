@@ -187,7 +187,26 @@ export default function ActivityFeed() {
     }
   }
 
-  const handleActivityClick = (activity: Activity) => {
+  const handleActivityClick = async (activity: Activity) => {
+    // Mark activity as read
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // For messages, mark as read
+        if (activity.type === 'message' && activity.id) {
+          await supabase
+            .from('messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', activity.id)
+        }
+        
+        // Reload activities after marking as read
+        setTimeout(() => loadActivities(), 300)
+      }
+    } catch (error) {
+      console.error('[ActivityFeed] Error marking as read:', error)
+    }
+    
     if (activity.matchId) {
       router.push(`/chat/${activity.matchId}`)
     } else if (activity.userId) {
@@ -216,7 +235,15 @@ export default function ActivityFeed() {
   return (
     <>
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen)
+          // When opening, clear the unread count after a short delay
+          if (!isOpen) {
+            setTimeout(() => {
+              setUnreadCount(0)
+            }, 500)
+          }
+        }}
         className="relative p-2 rounded-full glass border border-white/10 hover:bg-white/5 transition-all z-10"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
