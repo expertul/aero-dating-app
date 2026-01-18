@@ -245,55 +245,59 @@ export default function ActivityFeed() {
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, x: 300 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-full sm:w-96 glass border-l border-white/10 shadow-2xl z-[101] flex flex-col max-h-screen"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed inset-0 bg-dark-bg z-[101] flex flex-col"
             >
               {/* Header */}
-              <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Activity</h2>
+              <div className="safe-top bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between">
+                <h2 className="text-xl font-bold">Activity</h2>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded-full hover:bg-white/5"
+                  className="p-2 rounded-full hover:bg-white/5 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
-              {/* Activities */}
-              <div className="flex-1 overflow-y-auto">
+              {/* Activities - Full Screen Scrollable */}
+              <div className="flex-1 overflow-y-auto pb-20">
                 {activities.length === 0 ? (
-                  <div className="p-8 text-center text-gray-400">
-                    <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>No activity yet</p>
+                  <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 px-8">
+                    <Bell className="w-20 h-20 mx-auto mb-4 opacity-50" />
+                    <h3 className="text-lg font-semibold mb-2">No activity yet</h3>
+                    <p className="text-sm">You'll see likes, matches, and messages here</p>
                   </div>
                 ) : (
-                  <div className="p-2">
+                  <div className="p-4 space-y-2">
                     {activities.map((activity) => (
                       <motion.button
                         key={activity.id}
                         onClick={() => handleActivityClick(activity)}
-                        className={`w-full p-3 rounded-lg mb-2 text-left flex items-start gap-3 transition-all ${
-                          !activity.read ? 'bg-primary-red/10 border border-primary-red/20' : 'hover:bg-white/5'
+                        className={`w-full p-4 rounded-xl text-left flex items-start gap-3 transition-all ${
+                          !activity.read 
+                            ? 'bg-primary-red/10 border-2 border-primary-red/30' 
+                            : 'bg-dark-card hover:bg-white/5 border border-dark-border'
                         }`}
-                        whileHover={{ x: -4 }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                       >
-                        <div className="mt-0.5 flex-shrink-0">{getIcon(activity.type)}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{activity.title}</div>
-                          <div className="text-xs text-gray-400 mt-0.5">{activity.description}</div>
-                        </div>
                         {activity.avatar && (
                           <img
                             src={getMediaUrl(activity.avatar)}
                             alt=""
-                            className="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-white/10"
+                            className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-white/20"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none'
                             }}
                           />
                         )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-base mb-1">{activity.title}</div>
+                          <div className="text-sm text-gray-400">{activity.description}</div>
+                        </div>
+                        <div className="mt-1 flex-shrink-0">{getIcon(activity.type)}</div>
                       </motion.button>
                     ))}
                   </div>

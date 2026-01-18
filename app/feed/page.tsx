@@ -716,26 +716,17 @@ export default function FeedPage() {
       )}
 
       {/* Discovery Modes Dropdown */}
-      <AnimatePresence>
-        {showDiscoveryModes && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              onClick={() => setShowDiscoveryModes(false)}
-            />
-            <DiscoveryModes
-              currentMode={discoveryMode}
-              onModeChange={(mode) => {
-                setDiscoveryMode(mode)
-                setShowDiscoveryModes(false)
-              }}
-            />
-          </>
-        )}
-      </AnimatePresence>
+      {showDiscoveryModes && (
+        <div className="absolute top-16 left-4 right-4 z-50">
+          <DiscoveryModes
+            currentMode={discoveryMode}
+            onModeChange={(mode) => {
+              setDiscoveryMode(mode)
+              setShowDiscoveryModes(false)
+            }}
+          />
+        </div>
+      )}
 
       {/* Feed */}
       <div className="flex-1 relative px-2 pb-20">

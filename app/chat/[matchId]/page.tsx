@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { supabase, getMediaUrl } from '@/lib/supabase'
-import { ArrowLeft, Send, MoreVertical, Flag, Ban, Smile, Heart, Calendar, X } from 'lucide-react'
+import { ArrowLeft, Send, MoreVertical, Flag, Ban, Smile, Heart, Calendar, X, Camera, Video, MapPin, Gift } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { useStore } from '@/lib/store'
 import Icebreakers from '@/components/Icebreakers'
@@ -1205,8 +1205,95 @@ export default function ChatPage() {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="safe-bottom bg-gradient-to-t from-dark-card via-dark-card/95 to-transparent border-t border-white/10 backdrop-blur-xl px-4 py-3"
+        className="safe-bottom bg-gradient-to-t from-dark-card via-dark-card/95 to-transparent border-t border-white/10 backdrop-blur-xl px-4 py-3 space-y-2"
       >
+        {/* Action Buttons Row */}
+        <div className="flex items-center gap-2 px-2">
+          <motion.button
+            onClick={() => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = 'image/*'
+              input.onchange = (e: any) => {
+                const file = e.target.files[0]
+                if (file) {
+                  // Handle photo upload
+                  alert('Photo upload feature coming soon!')
+                }
+              }
+              input.click()
+            }}
+            className="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Camera className="w-4 h-4 text-primary-blue" />
+            <span className="text-xs font-medium">Photo</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={() => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = 'video/*'
+              input.onchange = (e: any) => {
+                const file = e.target.files[0]
+                if (file) {
+                  alert('Video upload feature coming soon!')
+                }
+              }
+              input.click()
+            }}
+            className="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Video className="w-4 h-4 text-primary-red" />
+            <span className="text-xs font-medium">Video</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={() => {
+              if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const { latitude, longitude } = position.coords
+                    const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
+                    setNewMessage(locationUrl)
+                    alert(`Location ready! Click send to share:\n${locationUrl}`)
+                  },
+                  () => {
+                    alert('Unable to get your location. Please enable location services.')
+                  }
+                )
+              } else {
+                alert('Location not supported on this device')
+              }
+            }}
+            className="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <MapPin className="w-4 h-4 text-primary-turquoise" />
+            <span className="text-xs font-medium">Location</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={() => {
+              const gifts = ['🎁', '🌹', '💝', '🎉', '💐', '🍫', '🎈', '⭐']
+              const randomGift = gifts[Math.floor(Math.random() * gifts.length)]
+              setNewMessage(randomGift + ' Gift for you!')
+            }}
+            className="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Gift className="w-4 h-4 text-yellow-500" />
+            <span className="text-xs font-medium">Gift</span>
+          </motion.button>
+        </div>
+        
+        {/* Message Input Row */}
         <div className="flex items-center gap-3">
               <motion.input
                 type="text"

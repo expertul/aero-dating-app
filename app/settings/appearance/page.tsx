@@ -43,7 +43,7 @@ export default function AppearancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-32">
+    <div className="min-h-screen bg-dark-bg overflow-y-auto pb-32">
       {/* Header */}
       <div className="safe-top bg-dark-card border-b border-dark-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <button

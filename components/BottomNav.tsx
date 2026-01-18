@@ -61,10 +61,10 @@ export default function BottomNav() {
 
     loadUnreadCount()
 
-    // Periodic refresh as backup (every 5 seconds)
+    // Periodic refresh as backup (every 2 seconds for more responsive updates)
     const refreshInterval = setInterval(() => {
       loadUnreadCount()
-    }, 5000)
+    }, 2000)
 
     // Subscribe to message changes with unique channel name
     const channelName = `nav-unread-${Date.now()}`
