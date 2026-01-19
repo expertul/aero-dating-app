@@ -43,7 +43,7 @@ export default function AppearancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg overflow-y-auto pb-32">
+    <div className="min-h-screen bg-dark-bg overflow-y-auto pb-40" style={{ paddingBottom: '200px' }}>
       {/* Header */}
       <div className="safe-top bg-dark-card border-b border-dark-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <button
@@ -226,8 +226,8 @@ export default function AppearancePage() {
         </div>
       </div>
 
-      {/* Save Button - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-dark-card border-t border-dark-border safe-bottom">
+      {/* Save Button - At bottom with margin */}
+      <div className="px-4 pb-8 mt-8">
         <motion.button
           onClick={handleSave}
           className="w-full py-3 rounded-full gradient-red text-white font-semibold text-base shadow-lg"

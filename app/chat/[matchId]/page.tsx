@@ -922,7 +922,7 @@ export default function ChatPage() {
                   </motion.div>
                 ) : (
                   // Normal message
-                  <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}>
+                  <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-6`}>
                     <div className="group relative max-w-[75%]">
                       <motion.div
                         initial={{ 

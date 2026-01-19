@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import ActivityTracker from '@/components/ActivityTracker'
 import BotQueueProcessor from '@/components/BotQueueProcessor'
-import FloatingActionButton from '@/components/FloatingActionButton'
 import AppearanceSettingsLoader from '@/components/AppearanceSettingsLoader'
 import AndroidBackHandler from '@/components/AndroidBackHandler'
 
@@ -36,7 +35,6 @@ export default function RootLayout({
         <AppearanceSettingsLoader />
         <ActivityTracker />
         <BotQueueProcessor />
-        <FloatingActionButton />
         {children}
       </body>
     </html>

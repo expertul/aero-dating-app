@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import { Home, MessageCircle, User, Settings } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
-import SmartSearch from './SmartSearch'
 import ActivityFeed from './ActivityFeed'
 
 export default function BottomNav() {
@@ -289,11 +288,6 @@ export default function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 safe-bottom z-40 flex justify-center pb-3 px-4">
       <div className="glass rounded-2xl border border-white/10 shadow-2xl px-1.5 py-1.5">
         <div className="flex items-center gap-0.5">
-          {/* Smart Search - Left side */}
-          <div className="mr-2">
-            <SmartSearch />
-          </div>
-          
           {navItems.map((item) => {
             const isActive = isActivePath(item.path)
             const Icon = item.icon
