@@ -14,10 +14,10 @@ export default function AppearancePage() {
 
   useEffect(() => {
     // Load saved preferences
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'auto' || 'dark'
-    const savedFontSize = localStorage.getItem('fontSize') as 'small' | 'medium' | 'large' || 'medium'
-    const savedAnimation = localStorage.getItem('animation') as 'smooth' | 'fast' | 'reduced' || 'smooth'
-    const savedColorScheme = localStorage.getItem('colorScheme') as 'default' | 'blue' | 'purple' || 'default'
+    const savedTheme = (localStorage.getItem('theme') as 'dark' | 'auto') || 'dark'
+    const savedFontSize = (localStorage.getItem('fontSize') as 'small' | 'medium' | 'large') || 'medium'
+    const savedAnimation = (localStorage.getItem('animation') as 'smooth' | 'fast' | 'reduced') || 'smooth'
+    const savedColorScheme = (localStorage.getItem('colorScheme') as 'default' | 'blue' | 'purple') || 'default'
 
     setTheme(savedTheme)
     setFontSize(savedFontSize)
