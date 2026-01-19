@@ -224,7 +224,6 @@ export default function AppearancePage() {
             </motion.button>
           </motion.div>
         </div>
-      </div>
 
         {/* Save Button */}
         <div className="mt-8 mb-20">

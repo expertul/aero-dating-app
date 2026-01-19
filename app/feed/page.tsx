@@ -86,6 +86,7 @@ export default function FeedPage() {
         supabase.removeChannel(channel)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   const loadTopPicks = useCallback(async (currentUserId: string) => {
