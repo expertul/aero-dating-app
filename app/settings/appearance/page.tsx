@@ -43,7 +43,7 @@ export default function AppearancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg overflow-y-auto pb-40" style={{ paddingBottom: '200px' }}>
+    <div className="min-h-screen bg-dark-bg">
       {/* Header */}
       <div className="safe-top bg-dark-card border-b border-dark-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <button
@@ -55,7 +55,7 @@ export default function AppearancePage() {
         <h1 className="text-lg font-semibold">Appearance & Display</h1>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6 pb-32">
         {/* Theme */}
         <div>
           <div className="flex items-center gap-2 mb-3">
@@ -226,16 +226,17 @@ export default function AppearancePage() {
         </div>
       </div>
 
-      {/* Save Button - At bottom with margin */}
-      <div className="px-4 pb-8 mt-8">
-        <motion.button
-          onClick={handleSave}
-          className="w-full py-3 rounded-full gradient-red text-white font-semibold text-base shadow-lg"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Save Changes
-        </motion.button>
+        {/* Save Button */}
+        <div className="mt-8 mb-20">
+          <motion.button
+            onClick={handleSave}
+            className="w-full py-3 rounded-full gradient-red text-white font-semibold text-base shadow-lg"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Save Changes
+          </motion.button>
+        </div>
       </div>
     </div>
   )

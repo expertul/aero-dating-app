@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase, getMediaUrl } from '@/lib/supabase'
 import { useStore } from '@/lib/store'
 import dynamic from 'next/dynamic'
-import { Sparkles, RefreshCw, Zap, RotateCcw, Star, Compass } from 'lucide-react'
+import { Sparkles, RefreshCw, Zap, RotateCcw, Star, Compass, Plus } from 'lucide-react'
 
 // Lazy load heavy components
 const ProfileCard = dynamic(() => import('@/components/ProfileCard'), {
@@ -38,6 +38,9 @@ export default function FeedPage() {
   const [showTopPicks, setShowTopPicks] = useState(false)
   const [discoveryMode, setDiscoveryMode] = useState<'classic' | 'explore' | 'speed' | 'events' | 'groups' | 'incognito'>('classic')
   const [showDiscoveryModes, setShowDiscoveryModes] = useState(false)
+  const [showQuickActions, setShowQuickActions] = useState(false)
+  const [superLikesUsedToday, setSuperLikesUsedToday] = useState(0)
+  const [boostsUsedToday, setBoostsUsedToday] = useState(0)
 
   useEffect(() => {
     checkAuth()
@@ -45,6 +48,7 @@ export default function FeedPage() {
     // Load top picks
     if (userId) {
       loadTopPicks(userId)
+      loadDailyLimits()
     }
     
     // Subscribe to new matches in real-time
@@ -93,6 +97,36 @@ export default function FeedPage() {
       // Error loading top picks
     }
   }, [])
+
+  const loadDailyLimits = useCallback(async () => {
+    if (!userId) return
+    
+    try {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Count super likes today
+      const { data: superLikes } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('from_user', userId)
+        .eq('kind', 'superlike')
+        .gte('created_at', today.toISOString())
+
+      setSuperLikesUsedToday(superLikes?.length || 0)
+
+      // Count boosts today
+      const { data: boosts } = await supabase
+        .from('boosts')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', today.toISOString())
+
+      setBoostsUsedToday(boosts?.length || 0)
+    } catch (error) {
+      console.error('Error loading daily limits:', error)
+    }
+  }, [userId])
 
   // Request notification permission
   useEffect(() => {
@@ -433,6 +467,12 @@ export default function FeedPage() {
   const handleLike = useCallback(async (kind: 'like' | 'superlike' = 'like') => {
     if (!userId || feedProfiles.length === 0) return
 
+    // Check super like limit
+    if (kind === 'superlike' && superLikesUsedToday >= 5) {
+      alert('You\'ve used all 5 Super Likes for today! Come back tomorrow.')
+      return
+    }
+
     const profile = feedProfiles[0]
     setLastSwipedProfile(profile)
     setLastSwipeAction(kind)
@@ -544,6 +584,12 @@ export default function FeedPage() {
   const handleBoost = useCallback(async () => {
     if (!userId || isBoosted) return
 
+    // Check daily limit
+    if (boostsUsedToday >= 3) {
+      alert('You\'ve used all 3 Boosts for today! Come back tomorrow.')
+      return
+    }
+
     try {
       const endsAt = new Date()
       endsAt.setHours(endsAt.getHours() + 1) // Boost for 1 hour
@@ -556,6 +602,7 @@ export default function FeedPage() {
         })
 
       setIsBoosted(true)
+      setBoostsUsedToday(prev => prev + 1)
       // Reload feed to show boosted profiles
       loadFeed(userId)
       
@@ -566,7 +613,7 @@ export default function FeedPage() {
     } catch (error) {
       // Error boosting
     }
-  }, [userId, isBoosted, loadFeed])
+  }, [userId, isBoosted, boostsUsedToday, loadFeed])
 
   const handleRewind = useCallback(async () => {
     if (!userId || !lastSwipedProfile || !lastSwipeAction) return
@@ -596,6 +643,10 @@ export default function FeedPage() {
       // Error rewinding
     }
   }, [userId, lastSwipedProfile, lastSwipeAction, feedProfiles, setFeedProfiles, setLastSwipedProfile, setLastSwipeAction])
+
+  const handleSuperLike = useCallback(() => {
+    handleLike('superlike')
+  }, [handleLike])
 
   const handleRefresh = useCallback(() => {
     if (userId) {
@@ -714,6 +765,64 @@ export default function FeedPage() {
           )}
         </div>
       )}
+
+      {/* Quick Actions Menu */}
+      <AnimatePresence>
+        {showQuickActions && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-16 right-4 z-50 glass rounded-xl border border-white/10 shadow-2xl overflow-hidden w-56"
+          >
+            <div className="p-2 space-y-1">
+              <motion.button
+                onClick={() => {
+                  handleSuperLike()
+                  setShowQuickActions(false)
+                }}
+                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-white/10 transition-all text-left"
+                whileHover={{ x: 4 }}
+              >
+                <Star className="w-5 h-5 text-primary-turquoise" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Super Like</p>
+                  <p className="text-xs text-gray-400">{5 - (superLikesUsedToday || 0)}/5 left today</p>
+                </div>
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  handleBoost()
+                  setShowQuickActions(false)
+                }}
+                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-white/10 transition-all text-left"
+                whileHover={{ x: 4 }}
+              >
+                <Zap className="w-5 h-5 text-primary-red" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Boost Profile</p>
+                  <p className="text-xs text-gray-400">{3 - (boostsUsedToday || 0)}/3 left today</p>
+                </div>
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  handleRewind()
+                  setShowQuickActions(false)
+                }}
+                className="w-full p-3 rounded-lg flex items-center gap-3 hover:bg-white/10 transition-all text-left"
+                whileHover={{ x: 4 }}
+                disabled={!lastSwipedProfile}
+              >
+                <RotateCcw className={`w-5 h-5 ${lastSwipedProfile ? 'text-primary-blue' : 'text-gray-600'}`} />
+                <div className="flex-1">
+                  <p className={`text-sm font-semibold ${!lastSwipedProfile ? 'text-gray-600' : ''}`}>Undo Last Swipe</p>
+                  <p className="text-xs text-gray-400">Rewind your last action</p>
+                </div>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Discovery Modes Dropdown */}
       {showDiscoveryModes && (
